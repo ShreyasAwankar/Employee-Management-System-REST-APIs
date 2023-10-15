@@ -1,0 +1,11 @@
+# Set the line ending style for all files to LF (Unix-style)
+* text=auto
+
+# Set the line ending style for specific file types
+*.txt text
+*.md text
+*.csv text
+
+# Set the line ending style for binary files (no line ending conversion)
+*.png binary
+*.jpg binary
