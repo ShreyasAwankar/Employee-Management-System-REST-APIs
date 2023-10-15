@@ -27,7 +27,7 @@ func GetAllEmployees(w http.ResponseWriter, r *http.Request) {
 
 	// Serialize the results to JSON and send the response
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	// w.Header().Set("Access-Control-Allow-Origin", "https://shreyasawankar.github.io")
 
 	w.WriteHeader(http.StatusOK)
 

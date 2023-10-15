@@ -2,11 +2,13 @@ package router
 
 import (
 	"Task2/controllers"
+	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
-func Router() *mux.Router {
+func Router() http.Handler {
 	router := mux.NewRouter()
 	subRouter := router.PathPrefix("/ems-api/v1").Subrouter()
 
@@ -17,5 +19,15 @@ func Router() *mux.Router {
 	subRouter.HandleFunc("/employees/{id}", controllers.UpdateEmployee).Methods("PUT")
 	subRouter.HandleFunc("/employees/{id}", controllers.DeleteEmployee).Methods("DELETE")
 
-	return subRouter
+	// Create a new CORS handler
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://shreyasawankar.github.io"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"*"},
+	})
+
+	// Wrap your subRouter with the CORS middleware
+	handler := c.Handler(router)
+
+	return handler
 }
