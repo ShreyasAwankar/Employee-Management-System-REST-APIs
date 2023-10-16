@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Employee Management System API",
-    "description": "REST API for managing employee records by Shreyas Awankar",
+    "description": "REST API for managing employee records by Shreyas Awankar.\n\n  Employee Management API (v1) is a RESTful service that allows you to manage employee data. This API provides a set of endpoints to create, retrieve, update, and delete employee records. It is designed to streamline the processes of managing employee information in an organization.",
     "version": "1.0.0",
     "contact": {
       "email": "shreyasawankar01@gmail.com"
@@ -26,7 +26,7 @@
           "Employees"
         ],
         "summary": "Retrieve all employees",
-        "operationId": "getAllEmployees",
+        "operationId": "GetAllEmployees",
         "responses": {
           "200": {
             "description": "List of employees",
@@ -50,53 +50,102 @@
         "summary": "Create a new employee",
         "operationId": "createEmployee",
         "requestBody": {
-          "description": "Employee data to be created",
+          "description": "Create new employee",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Employee"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "201": {
-            "description": "Employee created"
+            "description": "Employee created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON"
+          },
+          "422": {
+            "description": "Unprocessable Entity"
           }
         }
       }
     },
     "/employees/search": {
       "get": {
+        "tags": [
+          "Employees"
+        ],
         "summary": "Search employees",
-        "operationId": "searchEmployees",
+        "description": "Search for employees based on first name, last name, email, role. (Case sensitive)",
+        "operationId": "SearchEmployees",
         "parameters": [
           {
             "in": "query",
-            "name": "query",
+            "name": "firstName",
             "schema": {
               "type": "string"
             },
-            "description": "Search query for employees"
+            "description": "First name of the employee"
+          },
+          {
+            "in": "query",
+            "name": "lastName",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Last name of the employee"
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Email address of the employee"
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Role of the employee"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of employees matching the search criteria"
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Employee"
+                  }
+                }
+              }
+            }
           },
           "404": {
-            "description": "Employees not found"
+            "description": "Employee not found"
           }
-        },
-        "tags": [
-          "Employees"
-        ]
+        }
       }
     },
     "/employees/{id}": {
       "get": {
         "summary": "Retrieve an employee by ID",
-        "operationId": "getEmployee",
+        "operationId": "GetEmployee",
         "parameters": [
           {
             "in": "path",
@@ -110,7 +159,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Employee found"
+            "description": "Successful Operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Employee"
+                  }
+                }
+              }
+            }
           },
           "404": {
             "description": "Employee not found"
@@ -122,7 +181,7 @@
       },
       "put": {
         "summary": "Update an employee by ID",
-        "operationId": "updateEmployee",
+        "operationId": "UpdateEmployee",
         "parameters": [
           {
             "in": "path",
@@ -158,7 +217,7 @@
       },
       "delete": {
         "summary": "Delete an employee by ID",
-        "operationId": "deleteEmployee",
+        "operationId": "DeleteEmployee",
         "parameters": [
           {
             "in": "path",
@@ -227,15 +286,14 @@
           "birthdate"
         ],
         "example": {
-          "employee_id": 1,
           "first name": "John",
           "last name": "Doe",
           "email": "john.doe@example.com",
           "password": "secret123",
-          "phone no": 1234567890,
-          "role": "HR",
+          "phone no": "+91-7745679834",
+          "role": "admin",
           "salary": 50000,
-          "birthdate": "1990-01-01T00:00:00.000Z"
+          "birthdate": "1990-01-01"
         }
       }
     }

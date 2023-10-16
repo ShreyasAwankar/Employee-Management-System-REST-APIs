@@ -21,7 +21,7 @@ func Router() http.Handler {
 
 	// Create a new CORS handler
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"https://shreyasawankar.github.io"},
+		AllowedOrigins: []string{"*"}, // Allowing all origins to make requests.(For avoiding any client CORS conflicts for API testing)
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders: []string{"*"},
 	})

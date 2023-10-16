@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Helper functions
@@ -115,4 +117,8 @@ func GenerateEmployeeId() int {
 		}
 	}
 	return max + 1
+}
+
+func CreateLogger() *logrus.Logger {
+	return logrus.New()
 }

@@ -5,29 +5,32 @@ import (
 	"Task2/validations"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
 
+var logger = CreateLogger()
+var mu sync.Mutex
+
 // Controllers
 func GetAllEmployees(w http.ResponseWriter, r *http.Request) {
+
 	// Reading data from DB (ems.csv)
 	employees, err := ReadCSV("get")
 
 	if err != nil {
 		http.Error(w, "Error rading data", http.StatusInternalServerError)
-		log.Println("Internal Server Error : occured while reading the data from DB during controllers.GetAllEmployees function call")
+		logger.Error("\nInternal Server Error : occured while reading the data from DB during controllers.GetAllEmployees function call")
 		return
 	}
 
 	// Serialize the results to JSON and send the response
 	w.Header().Set("Content-Type", "application/json")
-	// w.Header().Set("Access-Control-Allow-Origin", "https://shreyasawankar.github.io")
 
 	w.WriteHeader(http.StatusOK)
 
@@ -35,13 +38,17 @@ func GetAllEmployees(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetEmployee(w http.ResponseWriter, r *http.Request) {
+
+	mu.Lock()
+	defer mu.Unlock()
+
 	vars := mux.Vars(r)
 
 	empId, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
 		http.Error(w, "Invalid Employee ID", http.StatusBadRequest)
-		log.Printf("Invalid id was employeeId was provided on GetEmployee function call\n%v", err)
+		logger.Error("\nInvalid id was employeeId was provided on GetEmployee function call")
 		return
 	}
 
@@ -49,7 +56,7 @@ func GetEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Could not read data from DB during controllers.GetEmployee function call\n%v", err)
+		logger.Error("\nCould not read data from DB during controllers.GetEmployee function call")
 		return
 	}
 
@@ -68,7 +75,6 @@ func GetEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if !empFound {
 		http.Error(w, "Employee not found!", http.StatusNotFound)
-		log.Printf("Employee not found with employeeId %v during controllers.GetEmployee function call", empId)
 		return
 	}
 
@@ -82,13 +88,18 @@ func GetEmployee(w http.ResponseWriter, r *http.Request) {
 var EmpId = GenerateEmployeeId()
 
 func CreateEmployee(w http.ResponseWriter, r *http.Request) {
+
+	mu.Lock()
+	defer mu.Unlock()
+
 	var employee models.Employee
 	err := json.NewDecoder(r.Body).Decode(&employee)
 	employee.ID = EmpId
 
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		log.Printf("Invalid JSON input for type Employee during controllers.CreateEmployee function call\n%v", err)
+		logger.Error("\nInvalid JSON input for type Employee during controllers.CreateEmployee function call")
+		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 
@@ -96,7 +107,8 @@ func CreateEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err1 != nil {
 		http.Error(w, "Invalid input for employee deatails", http.StatusUnprocessableEntity)
-		log.Printf("Invalid employee data input : occured while validating employee fields during controllers.CreateEmployee function call\n%v", err1)
+		logger.Errorf("\nInvalid employee data input : occured while validating employee fields during controllers.CreateEmployee function call")
+		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 
@@ -105,7 +117,7 @@ func CreateEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Could not write data to DB during controllers.CreateEmployee function call\n%v", err1)
+		logger.Errorf("\nCould not write data to DB during controllers.CreateEmployee function call")
 		return
 	}
 
@@ -118,13 +130,17 @@ func CreateEmployee(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
+
+	mu.Lock()
+	defer mu.Unlock()
+
 	vars := mux.Vars(r)
 
 	empId, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
 		http.Error(w, "Invalid Employee ID", http.StatusBadRequest)
-		log.Printf("Invalid id was employeeId was provided during controllers.UpdateEmployee function call\n%v", err)
+		logger.Errorf("\nInvalid id was employeeId was provided during controllers.UpdateEmployee function call")
 		return
 	}
 
@@ -132,7 +148,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Internal Server Error : occured while reading the data from DB during controllers.UpdateEmployee function call\n%v", err)
+		logger.Errorf("\nInternal Server Error : occured while reading the data from DB during controllers.UpdateEmployee function call")
 		return
 	}
 
@@ -140,7 +156,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&employeeToUpdate)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		log.Printf("Invalid JSON input for type Employee during controllers.UpdateEmployee function call\n%v", err)
+		logger.Errorf("\nInvalid JSON input for type Employee during controllers.UpdateEmployee function call")
 		return
 	}
 
@@ -148,7 +164,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err1 != nil {
 		http.Error(w, "Invalid input for employee deatails", http.StatusUnprocessableEntity)
-		log.Printf("Invalid employee data input : occured while validating employee fields during controllers.UpdateEmployee function call \n%v", err1)
+		logger.Errorf("\nInvalid employee data input : occured while validating employee fields during controllers.UpdateEmployee function call")
 		return
 	}
 
@@ -180,7 +196,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if !empFound {
 		http.Error(w, "Employee not found!", http.StatusNotFound)
-		log.Printf("Employee not found with employeeId %v during controllers.UpdateEmployee function call", empId)
+		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 
@@ -189,7 +205,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Error occured while to truncating DB (ems.csv) during UpdateEmployee operation\n%v", err)
+		logger.Errorf("\nError occured while to truncating DB (ems.csv) during UpdateEmployee operation")
 		return
 	}
 
@@ -199,7 +215,7 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			http.Error(w, "Internal Server error", http.StatusInternalServerError)
-			log.Printf("Could not write data to DB during controllers.UpdateEmployee function call\n%v", err1)
+			logger.Errorf("\nCould not write data to DB during controllers.UpdateEmployee function call")
 			return
 		}
 	}
@@ -211,6 +227,9 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 }
 
 func SearchEmployees(w http.ResponseWriter, r *http.Request) {
+
+	mu.Lock()
+	defer mu.Unlock()
 
 	query := r.URL.Query()
 
@@ -224,7 +243,7 @@ func SearchEmployees(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Could not read data from DB during controllers.SearchEmployees function call\n%v", err)
+		logger.Errorf("\nCould not read data from DB during controllers.SearchEmployees function call")
 		return
 	}
 
@@ -245,7 +264,7 @@ func SearchEmployees(w http.ResponseWriter, r *http.Request) {
 
 	if !empFound {
 		http.Error(w, "Employee not found!", http.StatusNotFound)
-		log.Println("Employees not found with provided query value during controllers.SearchEmployees function call")
+		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 
@@ -255,13 +274,17 @@ func SearchEmployees(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
+
+	mu.Lock()
+	defer mu.Unlock()
+
 	vars := mux.Vars(r)
 
 	empId, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
 		http.Error(w, "Invalid Employee ID", http.StatusBadRequest)
-		log.Printf("Invalid id was employeeId was provided on DeleteEmployee function call\n%v", err)
+		logger.Errorf("\nInvalid id was employeeId was provided on DeleteEmployee function call")
 		return
 	}
 
@@ -269,7 +292,7 @@ func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Could not read data from DB during controllers.DeleteEmployee function call\n%v", err)
+		logger.Errorf("\nCould not read data from DB during controllers.DeleteEmployee function call")
 		return
 	}
 
@@ -286,7 +309,7 @@ func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if !empFound {
 		http.Error(w, "Employee not found!", http.StatusNotFound)
-		log.Printf("Employee not found with employeeId %v during controllers.DeleteEmployee function call", empId)
+		w.Header().Set("Content-Type", "application/json")
 		return
 	}
 
@@ -295,7 +318,7 @@ func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.Printf("Error occured while to truncating DB (ems.csv) during controllers.DeleteEmployee function call\n%v", err)
+		logger.Errorf("\nError occured while to truncating DB (ems.csv) during controllers.DeleteEmployee function call")
 		return
 	}
 
@@ -305,7 +328,7 @@ func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			http.Error(w, "Internal Server error", http.StatusInternalServerError)
-			log.Printf("Could not write data to DB during controllers.DeleteEmployee function call\n%v", err)
+			logger.Errorf("\nCould not write data to DB during controllers.DeleteEmployee function call")
 			return
 		}
 	}
