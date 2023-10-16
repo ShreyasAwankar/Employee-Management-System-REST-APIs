@@ -17,7 +17,8 @@ func init() {
 }
 
 func validatePhoneNumber(fl validator.FieldLevel) bool {
-	regexPattern := regexp.MustCompile(`^\+\d{1,15}$`)
+	// This regex pattern will cover almost all international numbers.
+	regexPattern := regexp.MustCompile(`\+?\d{1,4}(?:[-|\s])?\d{1,15}`)
 	return regexPattern.MatchString(fl.Field().String())
 }
 
@@ -38,7 +39,7 @@ func validateRole(fl validator.FieldLevel) bool {
 }
 
 func validateDate(fl validator.FieldLevel) bool {
-	// Define a regular expression pattern for a valid date format (e.g., YYYY-MM-DD)
+	// Defining a regular expression pattern for a valid date format (e.g., YYYY-MM-DD)
 	datePattern := `^\d{4}-\d{2}-\d{2}$`
 	date := fl.Field().String()
 	match, _ := regexp.MatchString(datePattern, date)
