@@ -1,0 +1,243 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Employee Management System API",
+    "description": "REST API for managing employee records by Shreyas Awankar",
+    "version": "1.0.0",
+    "contact": {
+      "email": "shreyasawankar01@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/ems-api/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Employees",
+      "description": "Operations related to managing employee records."
+    }
+  ],
+  "paths": {
+    "/employees": {
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Retrieve all employees",
+        "operationId": "getAllEmployees",
+        "responses": {
+          "200": {
+            "description": "List of employees",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Employee"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Employees"
+        ],
+        "summary": "Create a new employee",
+        "operationId": "createEmployee",
+        "requestBody": {
+          "description": "Employee data to be created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Employee created"
+          }
+        }
+      }
+    },
+    "/employees/search": {
+      "get": {
+        "summary": "Search employees",
+        "operationId": "searchEmployees",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for employees"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of employees matching the search criteria"
+          },
+          "404": {
+            "description": "Employees not found"
+          }
+        },
+        "tags": [
+          "Employees"
+        ]
+      }
+    },
+    "/employees/{id}": {
+      "get": {
+        "summary": "Retrieve an employee by ID",
+        "operationId": "getEmployee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Employee ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Employee found"
+          },
+          "404": {
+            "description": "Employee not found"
+          }
+        },
+        "tags": [
+          "Employees"
+        ]
+      },
+      "put": {
+        "summary": "Update an employee by ID",
+        "operationId": "updateEmployee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Employee ID"
+          }
+        ],
+        "requestBody": {
+          "description": "Updated employee data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Employee"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Employee updated"
+          },
+          "404": {
+            "description": "Employee not found"
+          }
+        },
+        "tags": [
+          "Employees"
+        ]
+      },
+      "delete": {
+        "summary": "Delete an employee by ID",
+        "operationId": "deleteEmployee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Employee ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Employee deleted"
+          },
+          "404": {
+            "description": "Employee not found"
+          }
+        },
+        "tags": [
+          "Employees"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Employee": {
+        "type": "object",
+        "properties": {
+          "employee_id": {
+            "type": "integer"
+          },
+          "first name": {
+            "type": "string"
+          },
+          "last name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone no": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "salary": {
+            "type": "number"
+          },
+          "birthdate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "employee_id",
+          "first name",
+          "last name",
+          "email",
+          "role",
+          "salary",
+          "birthdate"
+        ],
+        "example": {
+          "employee_id": 1,
+          "first name": "John",
+          "last name": "Doe",
+          "email": "john.doe@example.com",
+          "password": "secret123",
+          "phone no": 1234567890,
+          "role": "HR",
+          "salary": 50000,
+          "birthdate": "1990-01-01T00:00:00.000Z"
+        }
+      }
+    }
+  }
+}
